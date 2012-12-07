@@ -58,12 +58,6 @@ bundle.on('bundle', onBundle)
 
 function onBundle() {
   bundled = bundle.bundle()
-  // TODO: use a parser
-  bundled = bundled
-    .replace(/console\.log\.bind\(console/g, 'tape.write.bind(tape')
-    .replace(/console\.log\.apply\(console/g, 'tape.write.apply(tape')
-    .replace(/console\.log\.call\(console/g, 'tape.write.call(tape')
-    .replace(/console\.log/g, 'tape.write')
   fs.writeFileSync(dir + '/tests.js', bundled)
 }
 
