@@ -4,6 +4,8 @@
 Execute tap(e) tests that require browsers...in your browser!
 Meanwhile have your tap output in the console and a comfy watch mode.
 
+`tapedeck` uses browserify for bundling your files.
+
 ## usage
 
 ```bash
