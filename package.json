@@ -1,0 +1,40 @@
+{
+  "name": "tapedeck",
+  "version": "0.0.1",
+  "description": "Run tap(e) tests that need a browser...in your browser!",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node index.js test/*.js"
+  },
+  "bin": {
+    "tapedeck": "./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/juliangruber/tapedeck"
+  },
+  "keywords": [
+    "tape",
+    "tap",
+    "test",
+    "browser",
+    "client"
+  ],
+  "author": "Julian Gruber <julian@juliangruber.com>",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "through": "~2.1.0",
+    "optimist": "~0.3.5",
+    "ecstatic": "~0.3.0",
+    "browserify": "~1.16.6",
+    "shoe": "0.0.7",
+    "glob": "~3.1.14"
+  },
+  "devDependencies": {
+    "tape": "~0.1.0"
+  }
+}

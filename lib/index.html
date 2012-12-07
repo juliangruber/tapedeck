@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>tapedeck</title>
+  </head>
+  <body>
+    <script src="/tapedeck.js"></script>
+    <script src="/reporter.js"></script>
+    <script>
+      document.write(
+        '<' + 'script src="/tests.js?' + Math.random().toString(16).slice(2) +
+        '"><' + '/script' + '>'
+      )
+    </script>
+  </body>
+</html>
