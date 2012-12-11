@@ -74,7 +74,6 @@ server.listen(port, function () {
 })
 
 // socket
-var reconnect = require('reconnect')
 var shoe = require('shoe')
 shoe(function (stream) {
   stream.pipe(process.stdout)
