@@ -70,7 +70,7 @@ var http = require('http')
 var ecstatic = require('ecstatic')
 var server = http.createServer(ecstatic(dir))
 server.listen(port, function () {
-  console.log('Open up http://localhost:' + port + ' in your browser\n')
+  console.log('Open up http://localhost:' + port + '/ in your browser\n')
 })
 
 // socket
