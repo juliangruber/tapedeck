@@ -1,6 +1,6 @@
 {
   "name": "tapedeck",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Run tap(e) tests that need a browser...in your browser!",
   "main": "index.js",
   "directories": {
