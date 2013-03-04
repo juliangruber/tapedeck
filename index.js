@@ -5,9 +5,9 @@ var fs = require('fs')
 var html = fs.readFileSync(__dirname + '/lib/index.html')
 var spawn = require('child_process').spawn
 var phantomjs = require('phantomjs')
+var freeport = require('freeport')
 
 // configuration
-var port = Math.round(Math.random() * 65535)
 var dir = '/tmp/' + Math.random().toString(16).slice(2)
 
 var argv = require('optimist')
@@ -78,17 +78,22 @@ function onBundle() {
 var http = require('http')
 var ecstatic = require('ecstatic')
 var server = http.createServer(ecstatic(dir))
-server.listen(port, function () {
-  var addr = 'http://localhost:' + port + '/';
-  if (argv.phantomjs) {
-    var ps = spawn(phantomjs.path, [
-      __dirname + '/script/phantom.js', addr
-    ])
-    ps.stderr.pipe(process.stderr)
-  } else {
-    console.log('Open up ' + addr + ' in your browser\n')
-  }
-})
+
+freeport(function (err, port) {
+  if (err) throw err
+
+  server.listen(port, function () {
+    var addr = 'http://localhost:' + port + '/';
+    if (argv.phantomjs) {
+      var ps = spawn(phantomjs.path, [
+        __dirname + '/script/phantom.js', addr
+      ])
+      ps.stderr.pipe(process.stderr)
+    } else {
+      console.log('Open up ' + addr + ' in your browser\n')
+    }
+  })
+})  
 
 // socket
 var shoe = require('shoe')
