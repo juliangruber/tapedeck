@@ -3,6 +3,8 @@
 var browserify = require('browserify')
 var fs = require('fs')
 var html = fs.readFileSync(__dirname + '/lib/index.html')
+var spawn = require('child_process').spawn
+var phantomjs = require('phantomjs')
 
 // configuration
 var port = Math.round(Math.random() * 65535)
@@ -10,10 +12,17 @@ var dir = '/tmp/' + Math.random().toString(16).slice(2)
 
 var argv = require('optimist')
   .usage('Usage: $0 [FILE/GLOB]... [OPTIONS]')
-  .alias('w', 'watch')
-  .alias('h', 'html')
+  
   .describe('w', 'watch mode')
+  .alias('w', 'watch')
+
   .describe('h', 'html reporter')
+  .alias('h', 'html')
+
+  .describe('p', 'test headlessly with phantomjs')
+  .alias('p', 'phantom')
+  .alias('p', 'phantomjs')
+
   .demand('_')
   .argv
 
@@ -27,7 +36,7 @@ fs.writeFileSync(dir + '/index.html', html)
 fs.writeFileSync(dir + '/tapedeck.js', client)
 
 // html reporter
-if (argv.h) {
+if (argv.h && !argv.phantomjs) {
   var reporter = browserify().addEntry(__dirname + '/lib/reporter.js').bundle()
   fs.writeFileSync(dir + '/reporter.js', reporter)  
 }
@@ -70,7 +79,15 @@ var http = require('http')
 var ecstatic = require('ecstatic')
 var server = http.createServer(ecstatic(dir))
 server.listen(port, function () {
-  console.log('Open up http://localhost:' + port + '/ in your browser\n')
+  var addr = 'http://localhost:' + port + '/';
+  if (argv.phantomjs) {
+    var ps = spawn(phantomjs.path, [
+      __dirname + '/script/phantom.js', addr
+    ])
+    ps.stderr.pipe(process.stderr)
+  } else {
+    console.log('Open up ' + addr + ' in your browser\n')
+  }
 })
 
 // socket
@@ -79,11 +96,13 @@ shoe(function (stream) {
   stream.pipe(process.stdout)
   if (!argv.w) {
     stream.on('data', function (data) {
-      if (data.match('# ok')) process.exit()
-      if (data.match('# fail')) {
-        failed = true
-        process.exit()
-      }
+      var isOk = data.match('# ok')
+      var isFail = data.match('# fail')
+
+      if (!isFail && !isOk) return
+      if (isFail) failed = true
+      stream.write('quit')
+      process.exit()
     })
     return 
   }
@@ -107,7 +126,9 @@ function cleanup () {
   cleanedUp = true
   fs.unlinkSync(dir + '/index.html')
   fs.unlinkSync(dir + '/tapedeck.js')
-  if (argv.html) fs.unlinkSync(dir + '/reporter.js')
+  if (argv.html && !argv.phantomjs) {
+    fs.unlinkSync(dir + '/reporter.js')
+  }
   fs.unlinkSync(dir + '/tests.js')
   fs.rmdirSync(dir)
   process.exit(failed)

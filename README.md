@@ -12,9 +12,9 @@ Meanwhile have your tap output in the console and a comfy watch mode.
 Usage: tapedeck [FILE/GLOB]... [OPTIONS]
 
 Options:
-  -w, --watch  watch mode       
-  -h, --html   html reporter
-
+  -w, --watch                 watch mode       
+  -h, --html                  html reporter
+  -p, --phantom, --phantomjs  test headlessly with phantomjs
 ```
 
 ### normal mode
@@ -78,6 +78,28 @@ ok 3 el changed
 
 # ok 
 ```
+
+### phantomjs
+
+BRAND NEW: use phantomjs to run you tests headlessly. This way you don't need
+to open a browser, phantomjs does all that for you.
+
+```bash
+$ tapedeck test/*.js -p
+TAP version 13
+# editable
+ok 1 input changed
+ok 2 stream received data
+ok 3 el changed
+
+1..3
+# tests 3
+# pass  3
+
+# ok 
+```
+
+Combine with `watch` for super powers!
 
 ### html reporter
 

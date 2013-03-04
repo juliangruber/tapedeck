@@ -1,13 +1,13 @@
 {
   "name": "tapedeck",
-  "version": "0.0.8",
+  "version": "0.1.0",
   "description": "Run tap(e) tests that need a browser...in your browser!",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "node index.js test/*.js"
+    "test": "node index.js test/*.js -p"
   },
   "bin": {
     "tapedeck": "./index.js"
@@ -31,7 +31,8 @@
     "ecstatic": "~0.3.0",
     "browserify": "~1.16.6",
     "shoe": "0.0.7",
-    "glob": "~3.1.14"
+    "glob": "~3.1.14",
+    "phantomjs": "~1.8.1-3"
   },
   "devDependencies": {
     "tape": "~0.1.5"
