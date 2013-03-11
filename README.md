@@ -8,6 +8,8 @@ Meanwhile have your tap output in the console and a comfy watch mode.
 
 Except for the `watch` mode everything works down to Internet Explorer 7!
 
+[![Build Status](https://travis-ci.org/juliangruber/tapedeck.png)](https://travis-ci.org/juliangruber/tapedeck)
+
 ## usage
 
 ```bash
