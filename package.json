@@ -1,6 +1,6 @@
 {
   "name": "tapedeck",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Run tap(e) tests that need a browser...in your browser!",
   "main": "index.js",
   "directories": {
@@ -41,5 +41,8 @@
   },
   "devDependencies": {
     "tape": "~0.1.5"
+  },
+  "engines": {
+    "node": ">=0.8"
   }
 }
