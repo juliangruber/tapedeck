@@ -6,6 +6,7 @@ var html = fs.readFileSync(__dirname + '/lib/index.html')
 var spawn = require('child_process').spawn
 var phantomjs = require('phantomjs')
 var freeport = require('freeport')
+var xws = require('xhr-write-stream')()
 
 // configuration
 var dir = '/tmp/' + Math.random().toString(16).slice(2)
@@ -30,16 +31,20 @@ var test = argv._[0]
 var failed = false
 
 // static test code
-var client = browserify().addEntry(__dirname + '/lib/client.js').bundle()
+var b = browserify()
+b.on('syntaxError', console.error)
+b.addEntry(__dirname + '/lib/client.js')
+var client = b.bundle()
+
 fs.mkdirSync(dir)
 fs.writeFileSync(dir + '/index.html', html)
 fs.writeFileSync(dir + '/tapedeck.js', client)
 
 // html reporter
-if (argv.h && !argv.phantomjs) {
-  var reporter = browserify().addEntry(__dirname + '/lib/reporter.js').bundle()
-  fs.writeFileSync(dir + '/reporter.js', reporter)  
-}
+var reporter = argv.h && !argv.phantomjs
+  ? browserify().addEntry(__dirname + '/lib/reporter.js').bundle()
+  : ''
+fs.writeFileSync(dir + '/reporter.js', reporter)  
 
 /**
  * tests bundle
@@ -77,7 +82,65 @@ function onBundle() {
 // http
 var http = require('http')
 var ecstatic = require('ecstatic')
-var server = http.createServer(ecstatic(dir))
+var EventEmitter = require('events').EventEmitter
+var serve = ecstatic(dir)
+var server = http.createServer()
+
+var events = new EventEmitter()
+if (argv.w) {
+  var lastChange
+  fs.watch(dir + '/tests.js', function () {
+    var tooEarly = Date.now() - lastChange < 1500
+    if (lastChange && tooEarly) return
+    lastChange = Date.now()
+    events.emit('reload')
+  })
+}
+
+server.on('request', function (req, res) {
+  if (req.url != '/xws') return
+
+  req.pipe(xws(function (stream) {
+    stream.pipe(process.stdout, { end : false })
+    if (!argv.w) {
+      var data = ''
+      stream.on('data', function (d) {
+        data += d
+        var isOk = data.match('# ok')
+        var isFail = data.match('# fail')
+
+        if (!isFail && !isOk) return
+        if (isFail) failed = true
+        events.emit('quit')
+        setTimeout(process.exit.bind(process))
+      })
+      return 
+    }
+  }))
+  req.on('end', res.end.bind(res))
+})
+
+server.on('request', function (req, res) {
+  if (req.url != '/command') return
+
+  function quit () { res.end('quit'); end() }
+  function reload () { res.end('reload'); end() }
+
+  events.once('quit', quit)
+  events.once('reload', reload)
+
+  req.on('close', end)
+
+  function end () {
+    events.removeListener('quit', quit)
+    events.removeListener('reload', reload)
+  }
+})
+
+server.on('request', function (req, res) {
+  if (req.url == '/command' || req.url == '/xws') return
+  serve(req, res)
+})
 
 freeport(function (err, port) {
   if (err) throw err
@@ -95,28 +158,6 @@ freeport(function (err, port) {
   })
 })  
 
-// socket
-var shoe = require('shoe')
-shoe(function (stream) {
-  stream.pipe(process.stdout)
-  if (!argv.w) {
-    stream.on('data', function (data) {
-      var isOk = data.match('# ok')
-      var isFail = data.match('# fail')
-
-      if (!isFail && !isOk) return
-      if (isFail) failed = true
-      stream.write('quit')
-      process.exit()
-    })
-    return 
-  }
-  
-  fs.watch(dir + '/tests.js', function () {
-    stream.write('reload')
-  })
-}).install(server, '/stream')
-
 /**
  * clean up
  */
@@ -131,9 +172,7 @@ function cleanup () {
   cleanedUp = true
   fs.unlinkSync(dir + '/index.html')
   fs.unlinkSync(dir + '/tapedeck.js')
-  if (argv.html && !argv.phantomjs) {
-    fs.unlinkSync(dir + '/reporter.js')
-  }
+  fs.unlinkSync(dir + '/reporter.js')
   fs.unlinkSync(dir + '/tests.js')
   fs.rmdirSync(dir)
   process.exit(failed)
