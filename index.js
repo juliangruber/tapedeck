@@ -7,9 +7,10 @@ var spawn = require('child_process').spawn
 var phantomjs = require('phantomjs')
 var freeport = require('freeport')
 var xws = require('xhr-write-stream')()
+var tmpdir = require('os').tmpdir
 
 // configuration
-var dir = '/tmp/' + Math.random().toString(16).slice(2)
+var dir = tmpdir() + Math.random().toString(16).slice(2)
 
 var argv = require('optimist')
   .usage('Usage: $0 [FILE/GLOB]... [OPTIONS]')
