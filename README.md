@@ -1,6 +1,10 @@
 
 # tapedeck
 
+***
+# DEPRECATED - Use [tape-run](https://github.com/juliangruber/tape-run) instead
+***
+
 Execute tap(e) tests that require browsers...in your browser!
 Meanwhile have your tap output in the console and a comfy watch mode.
 
